@@ -2,8 +2,10 @@
 
 ## Goal and architecture
 
+- Current development branch: `agent/pie-itr-v2-workbench` (local work reconciled against `origin/agent/initial-pie-itr-workbench`).
+
 - Turn technical communications into structured ITR Cases without bypassing Feishu-owned formulas, lookups, downstream tags, IDs, or Closed automation.
-- V1: `gui.py` Tkinter operational fallback; `main.py` CLI fallback.
+- Current mainline: V2 React Workbench. V1: `gui.py` Tkinter operational fallback; `main.py` CLI fallback.
 - Shared backend: `case_service.py` orchestrates existing Nextop, Feishu, analyzer, tag, image, duplicate, lock, Todo, and commit rules.
 - V2 preview: React/TypeScript `frontend/` -> local `local_api.py`/`api_adapter.py` -> existing `case_service.py`. V2 does not duplicate business rules and is not the default entry point.
 
@@ -28,15 +30,13 @@
 
 - V1 D2-D has two-column Case Review, workspace router, compact context, local scroll handling, Chinese-first Inspector, English email reply/copy, and teal LogiQ entry. `CaseEvidenceAttachment` is a future-only DTO; no OCR/vision exists.
 - V2 local preview has multi-case tabs, empty New Case, API-backed Search/Analyze/Translate/explicit Commit UI, Todo/notes local state, reply copy, and LogiQ button.
-- V2 dependencies installed with pnpm; `pnpm run build` passes. Local API health and Vite-proxied health were verified. No real ticket/business endpoint or production write was invoked.
-- A safe Git baseline is published on `agent/initial-pie-itr-workbench` with draft PR #1; credentials, runtime caches, dependencies, and build outputs are excluded.
-- Important: the local desktop project is still not a Git repository. Remote `.gitignore`, `config.example.py`, and this handoff update are not yet synchronized locally. Do not clone, pull, checkout, reset, or overwrite the local worktree.
-- After the V2 Windows acceptance task completes, perform Git integration as a separate task: protect the local copy, compare it with the remote baseline, initialize safely while preserving all local changes, bring in the remote safety files, scan for sensitive data, then decide whether PR #1 needs updating.
+- Phase 1 Closure baseline: successful V2 Search/Load automatically queues context-aware Analyze; failed preparation does not; Re-analyze remains manual. Workspace operation generations discard stale/closed responses. Context Pack is read-only: current Nextop conversation, same-reference Historical ITR, exact Error Code and Technical Information records with record/source provenance. No match is valid (`knowledge_coverage=none`); unreviewed `工单速查_V2` remains excluded as authoritative knowledge.
+- Inspector contract now includes `information_status`, `missing_information`, `reason_for_request`, and `next_action`. An insufficient result is normalized to a request-only English reply. A deterministic output guard prevents unsupported LogiQ/device-log requests and plainly repeated failed connector checks. Capability baseline: LUBA 1 has `device_log=unsupported` and `logiq=unsupported`; all unlisted products are `unknown`, never implicitly supported. Only explicit Commit may write.
+- V2 UI retains case-local Todo/notes/close state, Review fields, Copy Reply, translation cache behavior, and responsive desktop layout (270px Context column, no body horizontal overflow, internally scrollable Reply). LogiQ UI is enabled only for an explicitly supported capability and otherwise remains unavailable.
 
 ## Known risks / unverified work
 
-- V2 browser interaction acceptance is pending: safe mocked/read-only prepare/analyze/translate, workspace/stale-async isolation, error rendering, and UI layout.
-- V1 Windows visual acceptance remains pending at 1000×650, 1200×700, and maximized size, including repeated workspace switching/wheel behavior.
+- Git reconciliation is in progress; local source is preserved and the remote baseline is the commit parent. Sensitive local configuration and runtime caches remain ignored.
 
 ## Rules
 
@@ -52,5 +52,6 @@ python -B -m unittest -q test_case_service_d1b.py test_gui_d2a.py test_local_api
 cd frontend; pnpm run build
 ```
 
-- Current status: 20 offline tests pass; V2 production build passes; health smoke test passes.
-- Next and only task: perform Windows browser interaction acceptance of V2 with safe mocks/read-only data, then fix observed V2 integration defects without changing V1 business logic.
+- Closure tests: 33 Python offline tests pass (`test_case_service_d1b`, `test_context_service`, `test_gui_d2a`, `test_local_api`, `test_phase1_closure`); 8 frontend state/layout tests pass; V2 production build passes. No real Nextop/Feishu calls or writes were made during closure.
+- Known limitation: automated browser control was unavailable locally, so 1600x900 and 1920x1080 Chrome 100% visual acceptance remains a manual check; CSS/static tests cover its no-overflow, bounded-context, and scrollable-reply contract.
+- Next and only task after explicit user direction: Phase 1.5 Golden Regression / governed old-code comparison. Do not start Parts, RAG, Vision, assistant-ui, Data Browser, or any external write work automatically.
